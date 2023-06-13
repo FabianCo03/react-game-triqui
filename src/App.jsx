@@ -21,7 +21,6 @@ const Square = ({ children, isSelected, updateBoard, index }) => {
   );
 };
 
-
 const WINNER_COMBOS = [
   [0, 1, 2],
   [3, 4, 5],
@@ -32,7 +31,6 @@ const WINNER_COMBOS = [
   [0, 4, 8],
   [2, 4, 6],
 ]
-
 
 function App() {
   const [board, setBoard] = useState(Array(9).fill(null));
@@ -57,6 +55,21 @@ function App() {
     return null
   }
 
+  const resetGame = () => {
+    // pasar las mismas prop y que tengan el mismo estado y así la interfaz se replica. Se resetea el estado
+    setBoard(Array(9).fill(null));
+    setTurn(TURNS.X)
+    setWinner(null)
+  }
+
+  const checkEndGame = (newBoard) => {
+    // revisamos si hay un empate si no hay más epacios vacíos en el tablero
+
+    // si todas las square del array newBoard tiene que el square es != a null significa que ha terminado el juego con empate
+
+    return newBoard.every((square) => square != null)
+  }
+
   const updateBoard = (index) => {
     if(board[index] || winner) return //para no sobreescribir
 
@@ -69,9 +82,10 @@ function App() {
 
     const newWinner = checkWinner(newBoard)
     if(newWinner) {
-      // la actualizacion de los estados son asincronos, quiere decir que no bloquea el codigo que viene después. Por eso acá el alert sale primero que la X en el board
       setWinner(newWinner)
-      alert(`Ganador ${newWinner}`)
+      // TODO: check if game is over
+    } else if(checkEndGame(newBoard)) {
+      setWinner(false) // empate
     }
   }
 
@@ -79,10 +93,10 @@ function App() {
     <main className="board">
       <h1>Triqui</h1>
       <section className="game">
-        {board.map((_, index) => {
+        {board.map((square, index) => {
           return (
             <Square key={index} index={index} updateBoard={updateBoard}>
-              {board[index]}
+              {square}
             </Square>
           );
         })}
@@ -92,6 +106,27 @@ function App() {
 
         <Square isSelected={turn === TURNS.O}>{TURNS.O}</Square>
       </section>
+      <button onClick={resetGame}>Reiniciar</button>
+      {
+        winner != null && (
+          <section className="winner">
+            <div className="text">
+              <h2>
+                {
+                  winner === false ? 'Empate' : 'Ganó'
+                }
+                <header className="win">
+                  {winner && <Square>{winner}</Square>}
+                </header>
+                
+                <footer>
+                  <button onClick={resetGame}>Empezar de nuevo</button>
+                </footer>
+              </h2>
+            </div>
+          </section>
+        )
+      }
     </main>
   );
 }
