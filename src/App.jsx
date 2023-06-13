@@ -42,20 +42,23 @@ function App() {
   const [winner, setWinner] = useState(null) //null es que NO hay ganador, FALSE es empate
 
   const checkWinner = (boardToCheck) => {
-    // revisar combinaciones ganadoras para ver si X u O ganó
+
     for (const combo of WINNER_COMBOS) {
       const [a, b, c] = combo
-      if(boardToCheck[a] &&
+      if(
+        boardToCheck[a] &&
         boardToCheck[a] === boardToCheck[b] &&
-        boardToCheck[a] === boardToCheck[c]) {
+        boardToCheck[a] === boardToCheck[c]
+        ) {
         return boardToCheck[a]
       }
     }
+    // si no hay ganador
     return null
   }
 
   const updateBoard = (index) => {
-    if(board[index]) return
+    if(board[index] || winner) return //para no sobreescribir
 
     const newBoard = [...board]
     newBoard[index] = turn // x u o colocó ese index
@@ -63,6 +66,13 @@ function App() {
 
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X;
     setTurn(newTurn)
+
+    const newWinner = checkWinner(newBoard)
+    if(newWinner) {
+      // la actualizacion de los estados son asincronos, quiere decir que no bloquea el codigo que viene después. Por eso acá el alert sale primero que la X en el board
+      setWinner(newWinner)
+      alert(`Ganador ${newWinner}`)
+    }
   }
 
   return (
