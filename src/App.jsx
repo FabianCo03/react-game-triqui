@@ -21,17 +21,46 @@ const Square = ({ children, isSelected, updateBoard, index }) => {
   );
 };
 
+
+const WINNER_COMBOS = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
+]
+
+
 function App() {
   const [board, setBoard] = useState(Array(9).fill(null));
 
   const [turn, setTurn] = useState(TURNS.X);
 
+  const [winner, setWinner] = useState(null) //null es que NO hay ganador, FALSE es empate
+
+  const checkWinner = (boardToCheck) => {
+    // revisar combinaciones ganadoras para ver si X u O ganó
+    for (const combo of WINNER_COMBOS) {
+      const [a, b, c] = combo
+      if(boardToCheck[a] &&
+        boardToCheck[a] === boardToCheck[b] &&
+        boardToCheck[a] === boardToCheck[c]) {
+        return boardToCheck[a]
+      }
+    }
+    return null
+  }
+
   const updateBoard = (index) => {
+    if(board[index]) return
+
     const newBoard = [...board]
-    newBoard[index] = turn // X ó O
+    newBoard[index] = turn // x u o colocó ese index
     setBoard(newBoard)
 
-    // debemos asegurarnos de cambiar el turno entre uno y otro
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X;
     setTurn(newTurn)
   }
@@ -42,8 +71,6 @@ function App() {
       <section className="game">
         {board.map((_, index) => {
           return (
-            // ¿ por qué se pasa la función y no la ejecución ?
-            // porque no quiero ejecutar la función (ejemplo: updateBoard()); en este caso si hago esto, se me ejecutará 9 veces al recargar, y debo ejecutarlo solo cuando lo necesite
             <Square key={index} index={index} updateBoard={updateBoard}>
               {board[index]}
             </Square>
