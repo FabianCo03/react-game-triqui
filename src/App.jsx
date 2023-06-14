@@ -5,14 +5,17 @@ import { Square } from "./components/Square.jsx"
 import { TURNS } from "./constants.js"
 import { checkWinnerFrom, checkEndGame } from "./logic/board.js";
 import { WinnerModal } from "./components/WinnerModal.jsx"
-import { saveGameToStorage, resetGameToStorage } from "./logic/storage.js";
+import { saveGameToStorage, resetGameToStorage } from "./logic/storage/index.js";
 
 function App() {
   const [board, setBoard] = useState(() => {
     const boardFromStorage = window.localStorage.getItem('board')
-    return (
-      boardFromStorage ? JSON.parse(boardFromStorage) : (Array(9).fill(null))
-    ) 
+      
+    if (boardFromStorage && boardFromStorage != 'undefined') {
+        return JSON.parse(boardFromStorage)
+      } else {
+        return Array(9).fill(null)
+      } 
   });
 
   const [turn, setTurn] = useState(() => {
@@ -32,18 +35,20 @@ function App() {
   }
 
   const updateBoard = (index) => {
-    if(board[index] || winner) return //para no sobreescribir
-
+    //para no sobreescribir si ya tiene algo
+    if(board[index] || winner) return 
+    // actualizar tablero
     const newBoard = [...board]
-    newBoard[index] = turn // x u o clickeo ese index
+    // x u o clickeo ese index
+    newBoard[index] = turn
     setBoard(newBoard)
 
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X;
     setTurn(newTurn)
     
     saveGameToStorage({
-      board: newBoard,
-      turn: newTurn
+        board: newBoard,
+        turn: newTurn
       })
 
     const newWinner = checkWinnerFrom(newBoard)
@@ -55,7 +60,6 @@ function App() {
       setWinner(false) // empate
     }
   }
-
   return (
     <main className="board">
       <h1>Triqui</h1>
