@@ -23,19 +23,25 @@ function App() {
     return turnFromStorage ?? TURNS.X
   });
 
-  const [winner, setWinner] = useState(null) //null es que NO hay ganador, FALSE es empate
+  const [winner, setWinner] = useState(null) // null es que NO hay ganador, FALSE es empate
 
   const resetGame = () => {
     // pasar las mismas prop y que tengan el mismo estado y así la interfaz se replica. Se resetea el estado
     setBoard(Array(9).fill(null));
-    setTurn(TURNS.X)
+    // setTurn(TURNS.O)
     setWinner(null)
-
     resetGameToStorage()
   }
 
+  const [count, setCount] = useState(0)
+  const [countX, setCountX] = useState(0)
+  const [countO, setCountO] = useState(0)
+  const [countTie, setCountTie] = useState(0)
+  
+  
+
   const updateBoard = (index) => {
-    //para no sobreescribir si ya tiene algo
+    // para no sobreescribir si ya tiene algo
     if(board[index] || winner) return 
     // actualizar tablero
     const newBoard = [...board]
@@ -55,15 +61,33 @@ function App() {
     if(newWinner) {
       confetti()
       setWinner(newWinner)
-      // TODO: check if game is over
+
     } else if(checkEndGame(newBoard)) {
       setWinner(false) // empate
     }
+    // contador
+    if(newWinner || checkEndGame(newBoard)) {
+      setCount(count + 1)
+      if(turn == TURNS.X && newWinner == TURNS.X){
+        setCountX(countX + 1);
+        setTurn(TURNS.O)
+      } else if (turn == TURNS.O && newWinner == TURNS.O) {
+        setCountO(countO + 1);
+        setTurn(TURNS.X)
+      } else {
+        setCountTie(countTie + 1)
+      }
+    }
   }
+  
+  let textCount = 'partida'
+  count == 1 ? textCount : textCount += 's'
+
   return (
     <main className="board">
       <h1>Triqui</h1>
-      
+      <h2>Haz jugado {count} {textCount}</h2>
+
       <section className="game">
         {board.map((square, index) => {
           
@@ -76,12 +100,26 @@ function App() {
       </section>
       
       <section className="turn">
-        <Square isSelected={turn === TURNS.X}>{TURNS.X}</Square>
-        <Square isSelected={turn === TURNS.O}>{TURNS.O}</Square>
+        <Square 
+          isSelected={turn === TURNS.X}
+        >
+          {TURNS.X}
+          <p className="countPlayers-text">{countX}</p>
+        </Square>
+
+        <Square
+          isSelected={turn === TURNS.O}
+        >
+          {TURNS.O}
+          <p className="countPlayers-text">{countO}</p>
+        </Square>
+        
       </section>
+
+      <h3 className="empate">Empates {countTie}</h3>
       
       <button onClick={resetGame}>Reiniciar</button>
-      
+  
       <WinnerModal resetGame={resetGame} winner={winner}/>
 
     </main>
